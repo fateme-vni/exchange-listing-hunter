@@ -16,18 +16,17 @@ GEMINI_API_KEY = os.environ.get('GEMINI_API_KEY')
 
 DB_FILE = "sent_tweets_ai.txt"
 
-# آیدی‌های دقیق توییتر ۱۰ صرافی بزرگ اعلام‌شده توسط شما
 TWITTER_ACCOUNTS = [
-    "BinanceHelpDesk","binance",
-    "bitget" , "Bitget_Global",
-    "Bybit_Official",
-    "MEXC",
-    "Gate",
-    "kucoincom", 
-    "okx", 
-    "BingXOfficial",
-    "krakenfx",
-    "coinbase"
+    "binance",          # Binance
+    "Bybit_Official",   # Bybit
+    "kucoincom",        # KuCoin
+    "MEXC_Official",    # MEXC
+    "gate_io",          # Gate.io
+    "bitgetglobal",     # Bitget
+    "OKX",              # OKX
+    "BingXOfficial",    # BingX
+    "Krakenfx",         # Kraken
+    "Coinbase"          # Coinbase
 ]
 
 NITTER_INSTANCES = [
@@ -46,49 +45,10 @@ def load_sent_tweets():
     with open(DB_FILE, 'r', encoding='utf-8') as f:
         return set(line.strip() for line in f if line.strip())
 
-def save_sent_tweet(link):
+def save_sent_tweets(links):
     with open(DB_FILE, 'a', encoding='utf-8') as f:
-        f.write(link + '\n')
-
-async def analyze_listing_with_gemini(tweet_text, account):
-    """فیلتر تخصصی جمنای برای تشخیص ۱۰۰٪ لیستینگ‌های جدید بخش اسپات"""
-    prompt = f"""
-    You are an automated crypto trading bot. Your ONLY job is to detect NEW SPOT LISTINGS announcements from the exchange account @{account}.
-    
-    TWEET TEXT:
-    "{tweet_text}"
-    
-    Look for keywords like: list, listing, listed, spot trading, trading starts, now available, deposit opens, or pairs like ABC/USDT.
-    
-    CRITICAL FILTERS:
-    - If it's about FUTURES, PERPETUALS, LEVERAGE, or MARGIN listing, reply ONLY with "IGNORE".
-    - If it's a regular market update, giveaway, campaign, AMA, price pamp info, or maintenance announcement, reply ONLY with "IGNORE".
-    - It MUST be a new coin/token being added to the SPOT market.
-    
-    If it is a confirmed SPOT listing, extract the details and reply EXACTLY in this Persian (Farsi) format (use HTML tags for bolding):
-    
-    🚨 **لیستینگ جدید اسپات (Spot Listing)**
-    🏦 **صرافی:** {account}
-    🪙 **نام توکن/رمزارز:** [نام یا تیکر ارز را بنویس]
-    💵 **جفت‌ارزها:** [مثلا ABC/USDT یا مشخص نیست]
-    ⏰ **زمان شروع معامله:** [اگر زمان یا تاریخی در توییت ذکر شده بنویس، وگرنه بنویس ذکر نشده]
-    
-    📝 **ترجمه متن توییت:**
-    [ترجمه بسیار کوتاه و روان متن توییت به فارسی]
-    """
-    try:
-        loop = asyncio.get_running_loop()
-        response = await loop.run_in_executor(
-            None, 
-            lambda: ai_client.models.generate_content(
-                model='gemini-2.5-flash',
-                contents=prompt,
-            )
-        )
-        return response.text.strip()
-    except Exception as e:
-        print(f"Gemini API Error for @{account}: {e}")
-        return "IGNORE"
+        for link in links:
+            f.write(link + '\n')
 
 async def fetch_rss_with_retry(account):
     instances = NITTER_INSTANCES.copy()
@@ -99,20 +59,21 @@ async def fetch_rss_with_retry(account):
             req = urllib.request.Request(nitter_url, headers={'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'})
             loop = asyncio.get_running_loop()
             response_data = await loop.run_in_executor(None, lambda: urllib.request.urlopen(req, timeout=10).read())
-            return response_data, instance
+            return response_data
         except Exception:
             continue
-    raise Exception("All Nitter instances failed.")
+    return None
 
 async def check_single_account(account, sent_tweets, today_date):
+    tweets_found = []
     try:
-        response_data, used_instance = await fetch_rss_with_retry(account)
+        response_data = await fetch_rss_with_retry(account)
+        if not response_data:
+            return tweets_found
+
         root = ET.fromstring(response_data)
         items = root.findall('.//item')[:3]
         
-        if not items:
-            return
-
         for item in items:
             title = item.find('title').text if item.find('title') is not None else ""
             tweet_link = item.find('link').text if item.find('link') is not None else ""
@@ -136,46 +97,119 @@ async def check_single_account(account, sent_tweets, today_date):
             if clean_link in sent_tweets:
                 continue
             
-            tweet_text = title
-            if not tweet_text:
-                continue
-                
-            analysis_result = await analyze_listing_with_gemini(tweet_text, account)
-            
-            if "IGNORE" in analysis_result or len(analysis_result) < 10:
-                save_sent_tweet(clean_link)
-                sent_tweets.add(clean_link)
-                continue
-            
-            safe_original_text = html.escape(tweet_text)
-            
-            final_message = (
-                f"🤖 **[شکارچی لیستینگ]**\n\n"
-                f"{analysis_result}\n\n"
-                f"🇬🇧 **متن انگلیسی توییتر:**\n`{safe_original_text}`\n\n"
-                f"🔗 <a href='{clean_link}'>لینک اعلامیه در X</a>"
-            )
-            
-            try:
-                await bot.send_message(chat_id=TELEGRAM_CHAT_ID, text=final_message, parse_mode="HTML")
-                print(f"[+] Listing Report sent for @{account} successfully!")
-                
-                save_sent_tweet(clean_link)
-                sent_tweets.add(clean_link)
-                
-            except Exception as tg_err:
-                print(f"Error sending Telegram for @{account}: {tg_err}")
-                    
+            if title:
+                tweets_found.append({
+                    'account': account,
+                    'text': title,
+                    'link': clean_link
+                })
     except Exception as e:
-        print(f"Error checking @{account}: {e}")
+        print(f"Error reading @{account}: {e}")
+    return tweets_found
+
+async def analyze_all_with_gemini(tweets):
+    """تحلیل و فیلتر کل توییت‌ها به صورت یک‌جا با فقط ۱ درخواست به جمنای"""
+    if not tweets:
+        return []
+
+    formatted_tweets = ""
+    for i, t in enumerate(tweets):
+        formatted_tweets += f"ID: {i}\nExchange: @{t['account']}\nText: {t['text']}\n-------\n"
+
+    prompt = f"""
+    You are an expert crypto trading assistant. I will give you a list of recent tweets from major exchanges.
+    Your task is to detect NEW SPOT LISTINGS.
+    
+    CRITICAL FILTERS:
+    - Completely IGNORE Futures, Perpetual, Margin, Leverage, Campaigns, AMA, Maintainance, Giveaways, or standard market updates.
+    - It MUST be a brand new token/coin being added to the SPOT market for trading.
+
+    Here is the list of tweets:
+    {formatted_tweets}
+
+    For each tweet that is a valid NEW SPOT LISTING, reply EXACTLY in this format (separated by '===' between listings). If none match, reply with "NONE":
+    
+    MATCHED_ID: [Put the ID number here]
+    🚨 **لیستینگ جدید اسپات (Spot Listing)**
+    🏦 **صرافی:** [Exchange Name]
+    🪙 **نام توکن/رمزارز:** [Token Name or Ticker]
+    💵 **جفت‌ارزها:** [Pairs like ABC/USDT or Not Specified]
+    ⏰ **زمان شروع معامله:** [Trading time if mentioned, else write ذکر نشده]
+    📝 **ترجمه متن توییت:** [Short translation in Persian]
+    """
+
+    try:
+        loop = asyncio.get_running_loop()
+        response = await loop.run_in_executor(
+            None, 
+            lambda: ai_client.models.generate_content(
+                model='gemini-2.5-flash',
+                contents=prompt,
+            )
+        )
+        return response.text.strip()
+    except Exception as e:
+        print(f"Gemini API Error: {e}")
+        return "NONE"
 
 async def main_pipeline():
-    print(f"[{datetime.now().strftime('%H:%M:%S')}] Hunting for New Spot Listings on 10 Exchanges...")
+    print(f"[{datetime.now().strftime('%H:%M:%S')}] Gathering tweets from 10 exchanges...")
     sent_tweets = load_sent_tweets()
     today_date = datetime.now(timezone.utc).date()
     
+    # ۱. جمع‌آوری تمام توییت‌های جدید صرافی‌ها به صورت موازی و سریع
     tasks = [check_single_account(account, sent_tweets, today_date) for account in TWITTER_ACCOUNTS]
-    await asyncio.gather(*tasks)
+    results = await asyncio.gather(*tasks)
+    
+    all_new_tweets = []
+    for res in results:
+        all_new_tweets.extend(res)
+        
+    if not all_new_tweets:
+        print("No new tweets found in this slot.")
+        return
+
+    print(f"Found {len(all_new_tweets)} new tweets. Analyzing all in ONE Gemini call...")
+    
+    # ۲. ارسال کل توییت‌ها در یک درخواست واحد به جمنای
+    gemini_analysis = await analyze_all_with_gemini(all_new_tweets)
+    
+    links_to_save = [t['link'] for t in all_new_tweets]
+    
+    if "NONE" in gemini_analysis or len(gemini_analysis) < 15:
+        print("No spot listings detected by Gemini.")
+        save_sent_tweets(links_to_save)
+        return
+
+    # ۳. تفکیک پاسخ جمنای و ارسال موارد تایید شده به تلگرام
+    blocks = gemini_analysis.split("===")
+    for block in blocks:
+        if "MATCHED_ID:" in block:
+            try:
+                # پیدا کردن ID برای استخراج لینک مرجع
+                id_line = [line for line in block.split('\n') if "MATCHED_ID:" in line][0]
+                matched_id = int(id_line.split(":")[1].strip())
+                original_tweet = all_new_tweets[matched_id]
+                
+                # حذف خط شناسه برای زیباتر شدن پیام
+                clean_report = block.replace(id_line, "").strip()
+                
+                safe_original_text = html.escape(original_tweet['text'])
+                final_message = (
+                    f"🤖 **[شکارچی لیستینگ]**\n\n"
+                    f"{clean_report}\n\n"
+                    f"🇬🇧 **متن انگلیسی توییتر:**\n`{safe_original_text}`\n\n"
+                    f"🔗 <a href='{original_tweet['link']}'>لینک اعلامیه در X</a>"
+                )
+                
+                await bot.send_message(chat_id=TELEGRAM_CHAT_ID, text=final_message, parse_mode="HTML")
+                print(f"[+] Listing report sent for {original_tweet['account']}")
+            except Exception as tg_err:
+                print(f"Error parsing block or sending telegram: {tg_err}")
+
+    # ذخیره تمام توییت‌ها در تاریخچه تا در نوبت بعدی تکراری لود نشوند
+    save_sent_tweets(links_to_save)
+    print("Pipeline execution finished successfully.")
 
 if __name__ == "__main__":
     asyncio.run(main_pipeline())
