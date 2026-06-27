@@ -18,16 +18,16 @@ DB_FILE = "sent_tweets_ai.txt"
 
 # آیدی‌های دقیق توییتر ۱۰ صرافی بزرگ اعلام‌شده توسط شما
 TWITTER_ACCOUNTS = [
-    "binance",          # Binance
-    "Bybit_Official",   # Bybit
-    "kucoincom",        # KuCoin
-    "MEXC_Official",    # MEXC
-    "gate_io",          # Gate.io
-    "bitgetglobal",     # Bitget
-    "OKX",              # OKX
-    "BingXOfficial",    # BingX
-    "Krakenfx",         # Kraken
-    "Coinbase"          # Coinbase
+    "BinanceHelpDesk","binance",
+    "bitget" , "Bitget_Global",
+    "Bybit_Official",
+    "MEXC",
+    "Gate",
+    "kucoincom", 
+    "okx", 
+    "BingXOfficial",
+    "krakenfx",
+    "coinbase"
 ]
 
 NITTER_INSTANCES = [
