@@ -2340,3 +2340,6 @@ http://x.com/binance/status/2083931161269604544#m
 http://x.com/okx/status/2083938646982304109#m
 http://x.com/BingXOfficial/status/2083934119289827749#m
 http://x.com/krakenfx/status/2083930825658175874#m
+http://x.com/binance/status/2083976242735276482#m
+http://x.com/okx/status/2083983945545191624#m
+http://x.com/BingXOfficial/status/2083994997905396213#m
