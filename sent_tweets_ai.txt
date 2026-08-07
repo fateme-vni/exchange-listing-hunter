@@ -2647,3 +2647,7 @@ http://x.com/xStocksFi/status/2085682124091212053#m
 http://x.com/binance/status/2085728166555930712#m
 http://x.com/Bybit_Official/status/2085726275575148618#m
 http://x.com/wallet/status/2085714969895845969#m
+http://x.com/BingXOfficial/status/2085741107145580839#m
+http://x.com/krakenfx/status/2085744023021511069#m
+http://x.com/krakenfx/status/2085744020957855900#m
+http://x.com/coinbase/status/2085744628846751876#m
