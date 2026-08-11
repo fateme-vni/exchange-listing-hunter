@@ -2884,3 +2884,5 @@ http://x.com/KuCoin_Web3/status/2087147275743350925#m
 http://x.com/moonbag/status/2087189613521883459#m
 http://x.com/sue_xbt/status/2087056453031047376#m
 http://x.com/coinbase/status/2087192532169916661#m
+http://x.com/binance/status/2087208604487086228#m
+http://x.com/okx/status/2087200370791461147#m
