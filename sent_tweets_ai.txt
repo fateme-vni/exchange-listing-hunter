@@ -3126,3 +3126,6 @@ http://x.com/binance/status/2088460844606673050#m
 http://x.com/okx/status/2088468495398764817#m
 http://x.com/krakenlistings/status/2088426079879106844#m
 http://x.com/kucoincom/status/2088475874530058321#m
+http://x.com/binance/status/2088506337755853043#m
+http://x.com/okx/status/2088513793739436291#m
+http://x.com/BingXOfficial/status/2088513859581817255#m
