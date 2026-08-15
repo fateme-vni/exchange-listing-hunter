@@ -3122,3 +3122,6 @@ http://x.com/binance/status/2088416977672896559#m
 http://x.com/Bybit_Official/status/2088415374412783756#m
 http://x.com/okx/status/2088421666267230493#m
 http://x.com/BingXOfficial/status/2088450104604651632#m
+http://x.com/binance/status/2088460844606673050#m
+http://x.com/okx/status/2088468495398764817#m
+http://x.com/krakenlistings/status/2088426079879106844#m
