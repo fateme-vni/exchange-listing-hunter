@@ -3392,3 +3392,6 @@ http://x.com/binance/status/2090091599380226448#m
 http://x.com/BingXOfficial/status/2090090052726505961#m
 http://x.com/krakenlistings/status/2090091997227065745#m
 http://x.com/krakenpro/status/2090080957302763824#m
+http://x.com/okx/status/2090101517155975214#m
+http://x.com/krakenfx/status/2090099043942764782#m
+http://x.com/krakenfx/status/2090096455016915173#m
