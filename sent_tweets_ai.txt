@@ -3457,3 +3457,10 @@ http://x.com/binance/status/2090365456578441234#m
 http://x.com/kucoincom/status/2090365915083010362#m
 http://x.com/okx/status/2090370757809291290#m
 http://x.com/BingXOfficial/status/2090363450384105493#m
+http://x.com/binance/status/2090380033013764166#m
+http://x.com/Bybit_Official/status/2090378312241582506#m
+http://x.com/Bybit_Official/status/2090378308894470302#m
+http://x.com/Bybit_Official/status/2090378306562523242#m
+http://x.com/kucoincom/status/2090378316167717126#m
+http://x.com/coinbase/status/2090376001586946170#m
+http://x.com/coinbase/status/2090375939934814212#m
