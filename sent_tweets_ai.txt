@@ -3611,3 +3611,6 @@ http://x.com/binance/status/2090906970463101251#m
 http://x.com/okx/status/2090914339679064322#m
 http://x.com/coinbase/status/2090917313264660892#m
 http://x.com/coinbase/status/2090917301348683911#m
+http://x.com/Bybit_Official/status/2090921893343674860#m
+http://x.com/Bybit_Official/status/2090919625206722968#m
+http://x.com/Bybit_Official/status/2090919623394824462#m
